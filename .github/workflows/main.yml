@@ -21,14 +21,14 @@ jobs:
         wget "$(cat /tmp/brave.json| jq -r '.assets[].browser_download_url' | grep linux | grep -v symbols)"
         VERSION="$(cat /tmp/brave.json| jq -r .tag_name)"
         echo "BRAVE_VERSION=$VERSION" >> $GITHUB_ENV
-        if [[ -f *nightly*.zip ]]; then
+        if ls *nightly*.zip 1> /dev/null 2>&1; then
           # this is a nightly release
           # mark as pre release
           echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
           APPDIR=AppDir-nightly
           ICON=brave-browser-nightly
-        elif [[ -f *dev*.zip ]]; then
-          # this is a nightly release
+        elif ls *dev*.zip 1> /dev/null 2>&1; then
+          # this is a dev release
           # mark as pre release
           echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
           APPDIR=AppDir-dev
@@ -40,13 +40,15 @@ jobs:
         fi
         cp *.zip $APPDIR/.
         cd $APPDIR
-        unzip *.zip && rm -rf *.zip
+        unzip *.zip && rm -r *.zip
         ln -sr *.png "$ICON.png"
         cd ..
 
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x *.AppImage
         echo "AppDir: $APPDIR"
+        ls -al
+        ls -al "$APPDIR"
         VERSION="$BRAVE_VERSION" ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaju|Brave.AppImage|latest|Brave*.AppImage.zsync'
         mkdir dist
         mv Brave*.AppImage* dist/.
