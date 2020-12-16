@@ -16,6 +16,7 @@ jobs:
 
     - name: Download Brave
       run: |
+        set -u
         curl https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
         cat /tmp/brave.json| jq '.assets[].browser_download_url' | grep linux | grep -v symbols
         wget "$(cat /tmp/brave.json| jq -r '.assets[].browser_download_url' | grep linux | grep -v symbols)"
@@ -24,20 +25,25 @@ jobs:
         if ls *nightly*.zip 1> /dev/null 2>&1; then
           # this is a nightly release
           # mark as pre release
-          echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
+          BRAVE_PRERELEASE=true
+          BRAVE_TYPE=nightly
           APPDIR=AppDir-Nightly
           ICON=brave-browser-nightly
         elif ls *dev*.zip 1> /dev/null 2>&1; then
           # this is a dev release
           # mark as pre release
-          echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
+          BRAVE_PRERELEASE=true
+          BRAVE_TYPE=dev
           APPDIR=AppDir-Dev
           ICON=brave-browser-dev
         else
-          echo "BRAVE_PRERELEASE=false" >> $GITHUB_ENV
+          BRAVE_PRERELEASE=false
+          BRAVE_TYPE=stable
           APPDIR=AppDir
           ICON=brave-browser
         fi
+        echo "BRAVE_TYPE=$BRAVE_TYPE" >> $GITHUB_ENV
+        echo "BRAVE_PRERELEASE=$BRAVE_PRERELEASE" >> $GITHUB_ENV
         cp *.zip $APPDIR/.
         cd $APPDIR
         unzip *.zip && rm -r *.zip
@@ -49,7 +55,7 @@ jobs:
         echo "AppDir: $APPDIR"
         ls -al
         ls -al "$APPDIR"
-        ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaju|Brave.AppImage|latest|Brave*.AppImage.zsync'
+        ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaju|Brave.AppImage|$BRAVE_TYPE|Brave*.AppImage.zsync'
         mkdir dist
         mv Brave*.AppImage* dist/.
        
@@ -66,6 +72,16 @@ jobs:
         title: Brave AppImage ${{ env.BRAVE_VERSION }} Build
         automatic_release_tag: ${{ env.BRAVE_VERSION }}
         prerelease: ${{ env.BRAVE_PRERELEASE }}
+        files: |
+          dist/
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Release Continuous
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        title: Brave AppImage Continuous ${{ env.BRAVE_TYPE }} Build
+        automatic_release_tag: ${{ env.BRAVE_TYPE }}
+        prerelease: true
         files: |
           dist/
         repo_token: ${{ secrets.GITHUB_TOKEN }}
