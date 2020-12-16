@@ -18,7 +18,7 @@ jobs:
       run: |
         curl https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
         cat /tmp/brave.json| jq '.assets[].browser_download_url' | grep linux | grep -v symbols
-        wget "$(cat /tmp/brave.json| jq '.assets[].browser_download_url' | grep linux | grep -v symbols)"
+        wget "$(cat /tmp/brave.json| jq -r '.assets[].browser_download_url' | grep linux | grep -v symbols)"
         cp AppDir
         VERSION="$(cat /tmp/brave.json| jq -r .tag_name)"
         echo "BRAVE_VERSION=$VERSION" >> $GITHUB_ENV
