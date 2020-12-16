@@ -46,7 +46,7 @@ jobs:
 
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x *.AppImage
-        VERSION="$BRAVE_VERSION" ./appimagetool-x86_64.AppImage --comp gzip firefox -n -u 'gh-releases-zsync|srevinsaj|Brave.AppImage|latest|Brave*.AppImage.zsync'
+        VERSION="$BRAVE_VERSION" ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaj|Brave.AppImage|latest|Brave*.AppImage.zsync'
         mkdir dist
         mv Brave*.AppImage* dist/.
        
