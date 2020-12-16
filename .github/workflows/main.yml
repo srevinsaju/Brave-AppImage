@@ -9,9 +9,8 @@ on:
 
 
 jobs:
-  Firefox:
+  Brave:
     runs-on: ubuntu-latest
-    strategy:
     steps:
     - uses: actions/checkout@v2
 
