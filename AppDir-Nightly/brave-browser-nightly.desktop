@@ -122,4 +122,3 @@ Exec=brave-browser-nightly
 [Desktop Action new-private-window]
 Name=New Incognito Window
 Exec=brave-browser-nightly --incognito
-MimeType=x-scheme-handler/unknown;x-scheme-handler/about;text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;

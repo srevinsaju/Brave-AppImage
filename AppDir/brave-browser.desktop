@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Brave Dev
+Name=Brave
 # Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
 # From Ubuntu's language-pack-kde-XX-base packages, version 9.04-20090413.
 GenericName=Web Browser
@@ -105,11 +105,11 @@ Comment[zh_CN]=访问互联网
 Comment[zh_HK]=連線到網際網路
 Comment[zh_TW]=連線到網際網路
 StartupNotify=true
-StartupWMClass=brave-browser-dev
-TryExec=brave-browser-dev
-Exec=brave-browser-dev %U
+StartupWMClass=brave-browser
+TryExec=brave-browser
+Exec=brave-browser %U
 Terminal=false
-Icon=brave-browser-dev
+Icon=brave-browser
 Type=Application
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
@@ -117,9 +117,8 @@ Actions=new-window;new-private-window;
 
 [Desktop Action new-window]
 Name=New Window
-Exec=brave-browser-dev
+Exec=brave-browser
 
 [Desktop Action new-private-window]
 Name=New Incognito Window
-Exec=brave-browser-dev --incognito
-MimeType=x-scheme-handler/unknown;x-scheme-handler/about;text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
+Exec=brave-browser --incognito
