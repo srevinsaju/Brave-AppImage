@@ -1,5 +1,5 @@
 <h1 align="center">
-	<img src="https://brave.com/wp-content/uploads/2019/03/brave-logo.png" alt="Brave" height=200 width=200 align="middle">
+	<img src="https://brave.com/wp-content/uploads/2019/03/brave-logo.png" alt="Brave" height=200 align="middle">
 	Brave AppImage
 </h1>
 
