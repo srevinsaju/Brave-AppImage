@@ -25,13 +25,13 @@ jobs:
           # this is a nightly release
           # mark as pre release
           echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
-          APPDIR=AppDir-nightly
+          APPDIR=AppDir-Nightly
           ICON=brave-browser-nightly
         elif ls *dev*.zip 1> /dev/null 2>&1; then
           # this is a dev release
           # mark as pre release
           echo "BRAVE_PRERELEASE=true" >> $GITHUB_ENV
-          APPDIR=AppDir-dev
+          APPDIR=AppDir-Dev
           ICON=brave-browser-dev
         else
           echo "BRAVE_PRERELEASE=false" >> $GITHUB_ENV
