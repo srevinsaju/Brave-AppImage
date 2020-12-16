@@ -49,7 +49,7 @@ jobs:
         echo "AppDir: $APPDIR"
         ls -al
         ls -al "$APPDIR"
-        VERSION="$BRAVE_VERSION" ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaju|Brave.AppImage|latest|Brave*.AppImage.zsync'
+        ./appimagetool-x86_64.AppImage --comp gzip "$APPDIR" -n -u 'gh-releases-zsync|srevinsaju|Brave.AppImage|latest|Brave*.AppImage.zsync'
         mkdir dist
         mv Brave*.AppImage* dist/.
        
