@@ -12,7 +12,7 @@ Download the latest release from
 ![Brave Channels](https://brave.com/wp-content/uploads/2019/03/release-channel-icons.png)
 | Stable | Beta | Nightly | Dev |
 | ------- | --------- | --------| ------ | 
-| [Download](/srevinsaju/Brave-AppImage/releases/tag/stable) | [Download](/srevinsaju/Brave-AppImage/releases/tag/beta) | [Download](/srevinsaju/Brave-AppImage/releases/tag/nightly) | [Download](/srevinsaju/Brave-AppImage/releases/tag/dev)
+| [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/stable) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/beta) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/nightly) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/dev)
 
 
 ### Executing
