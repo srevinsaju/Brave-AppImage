@@ -48,7 +48,7 @@ jobs:
         cp *.zip $APPDIR/.
         cd $APPDIR
         unzip *.zip && rm -r *.zip
-        ln -sr product*logo*.png "$ICON.png"
+        ln -sr product*logo*128*.png "$ICON.png"
         cd ..
 
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
