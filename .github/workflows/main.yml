@@ -17,12 +17,22 @@ jobs:
     - name: Download Brave
       run: |
         set -u
-        # curl https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
-        curl https://api.github.com/repos/brave/brave-browser/releases/tags/v1.23.71 > /tmp/brave.json
+        
+        # to build a specific tag
+        # curl https://api.github.com/repos/brave/brave-browser/releases/tags/v1.23.71 > /tmp/brave.json
+        
+        # get the latest release
+        curl https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
+        
+        # extract the linux url, but without debug symbols
         cat /tmp/brave.json| jq '.assets[].browser_download_url' | grep linux | grep -v symbols
         wget "$(cat /tmp/brave.json| jq -r '.assets[].browser_download_url' | grep linux | grep -v symbols)"
+        
+        # set the version
         VERSION="$(cat /tmp/brave.json| jq -r .tag_name)"
         echo "BRAVE_VERSION=$VERSION" >> $GITHUB_ENV
+        
+        # determine the release type
         if ls *nightly*.zip 1> /dev/null 2>&1; then
           # this is a nightly release
           # mark as pre release
@@ -45,12 +55,15 @@ jobs:
         fi
         echo "BRAVE_TYPE=$BRAVE_TYPE" >> $GITHUB_ENV
         echo "BRAVE_PRERELEASE=$BRAVE_PRERELEASE" >> $GITHUB_ENV
+        
+        # copy the zip to the AppDir
         cp *.zip $APPDIR/.
         cd $APPDIR
         unzip *.zip && rm -r *.zip
         ln -sr product*logo*128*.png "$ICON.png"
         cd ..
 
+        # bundle the appimage now
         wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
         chmod +x *.AppImage
         echo "AppDir: $APPDIR"
