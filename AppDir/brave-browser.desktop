@@ -105,11 +105,11 @@ Comment[zh_CN]=访问互联网
 Comment[zh_HK]=連線到網際網路
 Comment[zh_TW]=連線到網際網路
 StartupNotify=true
-StartupWMClass=brave-browser
-TryExec=brave-browser
-Exec=brave-browser %U
+StartupWMClass=brave
+TryExec=brave
+Exec=brave %U
 Terminal=false
-Icon=brave-browser
+Icon=brave
 Type=Application
 Categories=Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
@@ -117,8 +117,8 @@ Actions=new-window;new-private-window;
 
 [Desktop Action new-window]
 Name=New Window
-Exec=brave-browser
+Exec=brave
 
 [Desktop Action new-private-window]
 Name=New Incognito Window
-Exec=brave-browser --incognito
+Exec=brave --incognito
