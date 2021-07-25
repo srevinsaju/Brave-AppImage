@@ -1,19 +1,31 @@
-<h1 align="center">
-	<img src="https://brave.com/wp-content/uploads/2019/03/brave-logo.png" alt="Brave" height=200 align="middle">
-	Brave AppImage
-</h1>
+<p align="center">
+    <img src="https://brave.com/wp-content/uploads/2019/03/brave-logo.png" alt="Brave logo" width=110 height=128>
 
-Brave Stable, Beta and Nightly (unofficial) AppImages by GitHub Actions Continuous Integration
+<h2 align="center">Brave AppImage</h2>
+
+  <p align="center">
+    Brave Stable, Beta and Nightly (unofficial) AppImages by GitHub Actions Continuous Integration
+    <br>
+    <a href="https://github.com/srevinsaju/Brave-Appimage/issues/new">Report bug</a>
+    ·
+    <a href="https://github.com/srevinsaju/Brave-Appimage/issues/new">Request feature</a>
+    ·
+    <a href="https://github.com/srevinsaju/Brave-Appimage/releases/latest">Download AppImage</a>
+  </p>
+</p>
 
 ## Get Started
 
 Download the latest release from
 
-![Brave Channels](https://brave.com/wp-content/uploads/2019/03/release-channel-icons.png)
 | Stable | Beta | Nightly | Dev |
 | ------- | --------- | --------| ------ | 
 | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/stable) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/beta) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/nightly) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/dev)
 
+or, use [`zap`](https://github.com/srevinsaju/zap), the command line AppImage package manager:
+```bash
+zap install --github --from=srevinsaju/Brave-AppImage brave-appimage
+```
 
 ### Executing
 #### File Manager
