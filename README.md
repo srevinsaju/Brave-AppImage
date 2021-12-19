@@ -61,6 +61,6 @@ cd squashfs-root
 ## License
 "Brave" is licensed under the [Mozilla Public License 2.0  (MPL 2.0)](https://en.wikipedia.org/wiki/Mozilla_Public_License)
 The official source code of the Brave is available at links provided 
-* https://github.com/brave/brave-browse
+* https://github.com/brave/brave-browser
 
 "GitHub Continuous Integration" is licensed under the MIT License. 
