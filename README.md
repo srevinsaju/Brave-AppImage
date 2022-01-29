@@ -18,9 +18,9 @@
 
 Download the latest release from
 
-| Stable | Beta | Nightly | Dev |
-| ------- | --------- | --------| ------ | 
-| [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/stable) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/beta) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/nightly) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/dev)
+| Stable | Nightly | Dev |
+| ------- | --------| ------ | 
+| [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/stable) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/nightly) | [Download](https://github.com/srevinsaju/Brave-AppImage/releases/tag/dev)
 
 or, use [`zap`](https://github.com/srevinsaju/zap), the command line AppImage package manager:
 ```bash
