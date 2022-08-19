@@ -1,0 +1,163 @@
+name: Release
+on:
+  workflow_call:
+    inputs:
+      input_json:
+        required: true
+        type: string
+
+jobs:
+  Setup:
+    runs-on: ubuntu-latest
+    steps:
+      - id: setVariables
+        run: |
+          echo ::set-output name=matrix::$input
+        env:
+          input: ${{ inputs.input_json }}
+    outputs:
+      matrix: ${{ steps.setVariables.outputs.matrix }}
+  Brave:
+    runs-on: ubuntu-latest
+    needs: Setup
+    strategy:
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download Brave
+        continue-on-error: true
+        run: |
+          set -u
+
+          # --------------------------- #
+          # ---  initial variables  --- #
+          # --------------------------- #
+
+          TAG=${{ matrix.tag }}
+          TYPE=${{ matrix.type }}
+          PRE=${{ matrix.prerelease }}
+
+          NAME=${TYPE^}
+          APPDIR="AppDir"
+          ICON="brave-browser"
+
+          if [ "$TYPE" != "stable" ]; then
+              TYPE_LINK="-$TYPE"
+              APPDIR="$APPDIR-$NAME"
+              ICON="$ICON-$TYPE"
+          else
+              TYPE_LINK=""
+          fi
+
+          # ----------------------------------- #
+          # ---  check linux url existence  --- #
+          # ----------------------------------- #
+
+          LINKS="https://github.com/brave/brave-browser/releases/download/${TAG}/brave-browser${TYPE_LINK}-${TAG:1}-linux-amd64.zip"
+
+          wget -q --spider $LINKS
+
+          if [ $? -eq 0 ]; then
+              UPLOAD_CONTENT=true
+          else
+              echo -e "\nDownload links unavilable for linux. Quitting ..."
+              UPLOAD_CONTENT=false
+          fi
+
+          echo "UPLOAD_CONTENT=$UPLOAD_CONTENT" >> $GITHUB_ENV
+
+          if [ $UPLOAD_CONTENT = true ]; then
+              # ----------------------- #
+              # ---  download urls  --- #
+              # ----------------------- #
+
+              echo "< Downloading files >"
+
+              wget -q --show-progress --progress=dot:giga $LINKS $LINKS.sha256
+
+              # ----------------------- #
+              # ---  verify hashes  --- #
+              # ----------------------- #
+
+              echo "< Verifying checksums >"
+
+              sha256sum -c *.sha256
+
+              if [ $? -ne 0 ]; then
+                  echo -e "\nBad checksums. Quitting ..."
+                  echo "UPLOAD_CONTENT=false" >> $GITHUB_ENV
+              fi
+
+              # ---------------------------- #
+              # ---  copy zip to AppDir  --- #
+              # ---------------------------- #
+
+              if [ $UPLOAD_CONTENT = true ]; then
+                  echo "< Copying files to AppDir >"
+
+                  unzip -q *.zip -d $APPDIR && rm -r *.zip *.zip.sha256
+                  cd $APPDIR
+                  ln -sr product*logo*128*.png "$ICON.png"
+                  cd ..
+
+                  # ------------------------- #
+                  # ---  bundle Appimage  --- #
+                  # ------------------------- #
+
+                  echo "< Bundling Appimage >"
+
+                  echo "AppDir: $APPDIR" && ls -al
+                  ls -al "$APPDIR"
+
+                  wget -q --show-progress --progress=dot:mega -O appimagetool \
+                      https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+                  chmod +x ./appimagetool
+
+                  ./appimagetool --comp gzip "$APPDIR" -n -u \
+                      "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Brave-AppImage|$TYPE|Brave*.AppImage.zsync" \
+                      "Brave-$TYPE-$TAG-x86_64.AppImage"
+
+                  mkdir dist && mv Brave*.AppImage* dist/.
+
+                  echo "< Done >"
+              fi
+
+              # ------------------------------------- #
+              # ---  store environment variables  --- #
+              # ------------------------------------- #
+
+              echo "BRAVE_PRERELEASE=$PRE" >> $GITHUB_ENV
+              echo "BRAVE_NAME=${TYPE^}" >> $GITHUB_ENV
+              echo "BRAVE_TYPE=$TYPE" >> $GITHUB_ENV
+              echo "BRAVE_VERSION=$TAG" >> $GITHUB_ENV
+          fi
+
+      - name: Upload artifact
+        if: ${{ env.UPLOAD_CONTENT }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: brave-continuous.AppImage
+          path: "dist"
+
+      - name: ${{ env.BRAVE_NAME }}
+        if: ${{ env.UPLOAD_CONTENT }}
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          title: Brave AppImage ${{ env.BRAVE_NAME }} ${{ env.BRAVE_VERSION }}
+          automatic_release_tag: ${{ env.BRAVE_VERSION }}
+          prerelease: ${{ env.BRAVE_PRERELEASE }}
+          files: |
+            dist/
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ${{ env.BRAVE_NAME }} Continuous
+        if: ${{ env.UPLOAD_CONTENT }}
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          title: Brave AppImage Continuous ${{ env.BRAVE_NAME }}
+          automatic_release_tag: ${{ env.BRAVE_TYPE }}
+          prerelease: true
+          files: |
+            dist/
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
