@@ -114,7 +114,9 @@ jobs:
                       https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
                   chmod +x ./appimagetool
 
-                  ./appimagetool --comp gzip "$APPDIR" -n -u \
+                  ./appimagetool --appimage-extract && mv ./squashfs-root ./appimagetool.AppDir
+
+                  ./appimagetool.AppDir/AppRun --comp gzip "$APPDIR" -n -u \
                       "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Brave-AppImage|$TYPE|Brave*.AppImage.zsync" \
                       "Brave-$TYPE-$TAG-x86_64.AppImage"
 
