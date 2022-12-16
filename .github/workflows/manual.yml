@@ -115,8 +115,8 @@ jobs:
         id: setVariables
         run: |
           input_json="{\"include\":[{\"tag\": \"$tag\", \"type\": \"$type\", \"prerelease\": \"$pre\",}]}"
-          echo "::set-output name=json::$input_json"
-          echo "::set-output name=build_release::$build_release"
+          echo "json=$input_json" >> $GITHUB_OUTPUT
+          echo "build_release=$build_release" >> $GITHUB_OUTPUT
   Build:
     needs: Setup
     if: ${{ fromJson(needs.setup.outputs.build_release) }}
