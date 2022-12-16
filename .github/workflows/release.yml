@@ -12,7 +12,7 @@ jobs:
     steps:
       - id: setVariables
         run: |
-          echo ::set-output name=matrix::$input
+          echo "matrix=$input" >> $GITHUB_OUTPUT
         env:
           input: ${{ inputs.input_json }}
     outputs:

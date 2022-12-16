@@ -95,8 +95,8 @@ jobs:
           input_avail: ${{ env.NEW_AVAILABLE }}
         id: setVariables
         run: |
-          echo "::set-output name=json::$input_json"
-          echo "::set-output name=new_avail::$input_avail"
+          echo "json=$input_json" >> $GITHUB_OUTPUT
+          echo "new_avail=$input_avail" >> $GITHUB_OUTPUT
   Build:
     needs: Check
     if: ${{ fromJson(needs.check.outputs.new_avail) }}
