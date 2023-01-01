@@ -16,6 +16,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Download Brave
+      env:
+          GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -u
         
@@ -23,7 +25,7 @@ jobs:
         # curl https://api.github.com/repos/brave/brave-browser/releases/tags/v1.23.71 > /tmp/brave.json
         
         # get the latest release
-        curl https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
+        curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/brave/brave-browser/releases/latest > /tmp/brave.json
         
         # extract the linux url, but without debug symbols
         cat /tmp/brave.json| jq '.assets[].browser_download_url' | grep linux | grep -v symbols
