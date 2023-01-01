@@ -20,7 +20,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       run: |
         set -u
-        
+        export APPIMAGE_EXTRACT_AND_RUN=1 
         # to build a specific tag
         # curl https://api.github.com/repos/brave/brave-browser/releases/tags/v1.23.71 > /tmp/brave.json
         
