@@ -144,22 +144,30 @@ jobs:
 
       - name: ${{ env.BRAVE_NAME }}
         if: ${{ env.UPLOAD_CONTENT }}
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: ncipollo/release-action@v1.12.0
         with:
-          title: Brave AppImage ${{ env.BRAVE_NAME }} ${{ env.BRAVE_VERSION }}
-          automatic_release_tag: ${{ env.BRAVE_VERSION }}
+          name: Brave AppImage ${{ env.BRAVE_NAME }} ${{ env.BRAVE_VERSION }}
+          tag: ${{ env.BRAVE_VERSION }}
           prerelease: ${{ env.BRAVE_PRERELEASE }}
-          files: |
-            dist/
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: |
+            dist/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          removeArtifacts: true
+          artifactErrorsFailBuild: true
+          generateReleaseNotes: true
 
       - name: ${{ env.BRAVE_NAME }} Continuous
         if: ${{ env.UPLOAD_CONTENT }}
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: ncipollo/release-action@v1.12.0
         with:
-          title: Brave AppImage Continuous ${{ env.BRAVE_NAME }}
-          automatic_release_tag: ${{ env.BRAVE_TYPE }}
+          name: Brave AppImage Continuous ${{ env.BRAVE_NAME }}
+          tag: ${{ env.BRAVE_TYPE }}
           prerelease: true
-          files: |
-            dist/
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: |
+            dist/*
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          removeArtifacts: true
+          artifactErrorsFailBuild: true
+          generateReleaseNotes: true
