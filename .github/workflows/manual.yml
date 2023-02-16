@@ -1,0 +1,125 @@
+name: Manual Release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Brave version tag ("latest" or "vX.Y.Z")'
+        required: true
+        default: "latest"
+        type: string
+      rebuild:
+        description: "Force rebuilding release"
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  Setup:
+    outputs:
+      json: ${{ steps.setVariables.outputs.json }}
+      build_release: ${{ steps.setVariables.outputs.build_release }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Build
+        continue-on-error: true
+        run: |
+          set -u
+
+          # --------------------------- #
+          # ---  initial variables  --- #
+          # --------------------------- #
+
+          INPUT_TAG=${{ inputs.tag }}
+          INPUT_REBUILD=${{ inputs.rebuild }}
+
+          # --------------------- #
+          # ---  get release  --- #
+          # --------------------- #
+
+          TAG=${INPUT_TAG:-"latest"}  # if no manual input, use "latest" by default
+          REBUILD=${INPUT_REBUILD:-false}
+
+          echo "< Fetching release >"
+
+          if [ $TAG == "latest" ]; then
+              BRAVE="$(curl -s https://api.github.com/repos/brave/brave-browser/releases?per_page=1 | jq -r '.[0]')"
+              TAG="$(echo $BRAVE | jq '.tag_name' | sed 's/\"//g')"
+          else
+              BRAVE="$(curl -s "https://api.github.com/repos/brave/brave-browser/releases/tags/${TAG}")"
+          fi
+
+          # --------------------------------- #
+          # ---  check release existence  --- #
+          # --------------------------------- #
+
+          ID="$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" | jq -r .id)"
+
+          if [ "$ID" != "null" ] && [ $REBUILD = false ]; then
+              echo -e "Release ${TAG} already exists."
+              BUILD_RELEASE=false
+          else
+              NAME="$(echo $BRAVE | jq '.name' | sed 's/ \\n\\n//g')"
+
+              EXISTS=$(echo "$BRAVE" | jq --arg TAG "$TAG" -r '. | select(.tag_name==$TAG) |
+                                      .assets[].browser_download_url | contains("linux")' | sort | uniq)
+
+              if [ "$EXISTS" = "false" ]; then
+                  echo "< Download links unavailable for ${NAME} >"
+                  BUILD_RELEASE=false
+              else
+                  echo -e "< Building: ${NAME} >"
+
+                  # -------------------------------- #
+                  # ---  determine release type  --- #
+                  # -------------------------------- #
+
+                  if [[ $NAME =~ "Nightly" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=nightly
+
+                  elif [[ $NAME =~ "Dev" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=dev
+
+                  elif [[ $NAME =~ "Beta" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=beta
+
+                  elif [[ $NAME =~ "Release" ]]; then
+                      BRAVE_PRERELEASE=false
+                      BRAVE_TYPE=stable
+                  fi
+
+                  BUILD_RELEASE=true
+              fi
+          fi
+
+          if [ $BUILD_RELEASE = true ]; then
+              # ------------------------------------- #
+              # ---  store environment variables  --- #
+              # ------------------------------------- #
+
+              echo "TAG=$TAG" >> $GITHUB_ENV
+              echo "TYPE=$BRAVE_TYPE" >> $GITHUB_ENV
+              echo "PRE=$BRAVE_PRERELEASE" >> $GITHUB_ENV
+          fi
+
+          echo "BUILD_RELEASE=$BUILD_RELEASE" >> $GITHUB_ENV
+      - env:
+          tag: ${{ env.TAG }}
+          type: ${{ env.TYPE }}
+          pre: ${{ env.PRE }}
+          build_release: ${{ env.BUILD_RELEASE }}
+        id: setVariables
+        run: |
+          input_json="{\"include\":[{\"tag\": \"$tag\", \"type\": \"$type\", \"prerelease\": \"$pre\",}]}"
+          echo "json=$input_json" >> $GITHUB_OUTPUT
+          echo "build_release=$build_release" >> $GITHUB_OUTPUT
+  Build:
+    needs: Setup
+    if: ${{ fromJson(needs.setup.outputs.build_release) }}
+    uses: ./.github/workflows/release.yml
+    with:
+      input_json: ${{ needs.setup.outputs.json }}
