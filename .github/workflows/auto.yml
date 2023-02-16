@@ -1,0 +1,139 @@
+name: Automatic Release
+on:
+  schedule:
+    - cron: 15 */8 * * *
+  workflow_dispatch:
+
+jobs:
+  Check:
+    outputs:
+      json: ${{ steps.setVariables.outputs.json }}
+      new_avail: ${{ steps.setVariables.outputs.new_avail }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Latest Releases
+        run: |
+          # ----------------------------- #
+          # ---  get release version  --- #
+          # ----------------------------- #
+
+          echo "< Fetching versions >"
+
+          BRAVE="$(curl -s https://api.github.com/repos/brave/brave-browser/releases?per_page=5)"
+          RELEASES="$(echo "$BRAVE" | jq -S -r '.[] | {name,tag_name}' | sed 's/ \\n\\n//g')"
+          TAG_NAMES=$(echo "$RELEASES" | jq '.tag_name')
+
+          # Only include latest version of release type to avoid conflict.
+          # It's also pointless building outdated releases.
+          LATEST_NIGHTLY=false
+          LATEST_DEV=false
+          LATEST_BETA=false
+          LATEST_RELEASE=false
+
+          OUT="{\"include\":[]}"
+
+          # --------------------------------- #
+          # ---  check release existence  --- #
+          # --------------------------------- #
+
+          echo "[ CHECKING ][ "$TAG_NAMES" ]"
+
+          while read -r TAG; do
+            # -- Skip existent releases --
+            ID="$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" | jq -r .id)"
+
+            if [ "$ID" != "null" ]; then
+                echo -e "Release ${TAG} already exists."
+            else
+                # -- check download links --
+                NAME="$(echo "$RELEASES" | jq --arg TAG "$TAG" '. | select(.tag_name==$TAG) | .name' | sed 's/\"//g')"
+                EXISTS=$(echo "$BRAVE" | jq --arg TAG "$TAG" -r '.[] | select(.tag_name==$TAG) |
+                                        .assets[].browser_download_url | contains("linux")' | sort | uniq)
+
+                if [ "$EXISTS" = "false" ]; then
+                    echo "< Download links unavailable for ${NAME} >"
+                else
+                    echo -e "< New Release: ${NAME} >"
+
+                    SKIP=true
+
+                    # -------------------------------- #
+                    # ---  determine release type  --- #
+                    # -------------------------------- #
+
+                    # -- Nightly
+                    if [[ $NAME =~ "Nightly" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=nightly
+                      if [[ $LATEST_NIGHTLY == false ]]; then
+                        LATEST_NIGHTLY=true
+                        SKIP=false
+                      fi
+                    # -- Development
+                    elif [[ $NAME =~ "Dev" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=dev
+                      if [[ $LATEST_DEV == false ]]; then
+                        LATEST_DEV=true
+                        SKIP=false
+                      fi
+                    # -- Beta
+                    elif [[ $NAME =~ "Beta" ]]; then
+                      BRAVE_PRERELEASE=true
+                      BRAVE_TYPE=beta
+                      if [[ $LATEST_BETA == false ]]; then
+                        LATEST_BETA=true
+                        SKIP=false
+                      fi
+                    # -- Release
+                    elif [[ $NAME =~ "Release" ]]; then
+                      BRAVE_PRERELEASE=false
+                      BRAVE_TYPE=stable
+                      if [[ $LATEST_RELEASE == false ]]; then
+                        LATEST_RELEASE=true
+                        SKIP=false
+                      fi
+                    fi
+
+                    # -- Add latest release to output --
+                    if [[ $SKIP == false ]]; then
+                      OUT="$(echo $OUT | jq -c \
+                      --arg TAG "$TAG" \
+                      --arg TYPE "$BRAVE_TYPE" \
+                      --arg PRERELEASE "$BRAVE_PRERELEASE" \
+                      '.include |= . +
+                      [{
+                          "tag": $TAG,
+                          "type": $TYPE,
+                          "prerelease": $PRERELEASE,
+                      }]')"
+                    fi
+                fi
+            fi
+          done < <(echo "$RELEASES" | jq '.tag_name' | sed 's/\"//g')
+
+          # -- Build releases, if they exist --
+          if [ "$OUT" == "{\"include\":[]}" ]; then
+              echo "NEW_AVAILABLE=false" >> $GITHUB_ENV
+          else
+              echo "NEW_AVAILABLE=true" >> $GITHUB_ENV
+
+              echo "OUT<<EOF" >> $GITHUB_ENV
+              echo $OUT >> $GITHUB_ENV
+              echo "EOF" >> $GITHUB_ENV
+          fi
+      - env:
+          input_json: ${{ env.OUT }}
+          input_avail: ${{ env.NEW_AVAILABLE }}
+        id: setVariables
+        run: |
+          echo "json=$input_json" >> $GITHUB_OUTPUT
+          echo "new_avail=$input_avail" >> $GITHUB_OUTPUT
+  Build:
+    needs: Check
+    if: ${{ fromJson(needs.check.outputs.new_avail) }}
+    uses: ./.github/workflows/release.yml
+    with:
+      input_json: ${{ needs.check.outputs.json }}
