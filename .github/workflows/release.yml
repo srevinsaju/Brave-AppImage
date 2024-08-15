@@ -28,6 +28,9 @@ jobs:
       - name: Download Brave
         continue-on-error: true
         run: |
+          # Install appimagetool dependency
+          sudo apt-get -y install desktop-file-utils
+
           set -u
 
           # --------------------------- #
@@ -111,12 +114,12 @@ jobs:
                   ls -al "$APPDIR"
 
                   wget -q --show-progress --progress=dot:mega -O appimagetool \
-                      https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+                      https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
                   chmod +x ./appimagetool
 
                   ./appimagetool --appimage-extract && mv ./squashfs-root ./appimagetool.AppDir
 
-                  ./appimagetool.AppDir/AppRun --comp gzip "$APPDIR" -n -u \
+                  ./appimagetool.AppDir/AppRun --comp zstd "$APPDIR" -n -u \
                       "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Brave-AppImage|$TYPE|Brave*.AppImage.zsync" \
                       "Brave-$TYPE-$TAG-x86_64.AppImage"
 
