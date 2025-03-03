@@ -147,7 +147,7 @@ jobs:
 
       - name: ${{ env.BRAVE_NAME }}
         if: ${{ env.UPLOAD_CONTENT }}
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           name: Brave AppImage ${{ env.BRAVE_NAME }} ${{ env.BRAVE_VERSION }}
           tag: ${{ env.BRAVE_VERSION }}
@@ -162,7 +162,7 @@ jobs:
 
       - name: ${{ env.BRAVE_NAME }} Continuous
         if: ${{ env.UPLOAD_CONTENT }}
-        uses: ncipollo/release-action@v1.15.0
+        uses: ncipollo/release-action@v1.16.0
         with:
           name: Brave AppImage Continuous ${{ env.BRAVE_NAME }}
           tag: ${{ env.BRAVE_TYPE }}
