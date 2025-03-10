@@ -31,7 +31,7 @@ jobs:
           # Install appimagetool dependency
           sudo apt-get -y install desktop-file-utils
 
-          set -u
+          set -uex
 
           # --------------------------- #
           # ---  initial variables  --- #
@@ -123,6 +123,8 @@ jobs:
                       "gh-releases-zsync|$GITHUB_REPOSITORY_OWNER|Brave-AppImage|$TYPE|Brave*.AppImage.zsync" \
                       "Brave-$TYPE-$TAG-x86_64.AppImage"
 
+                  ls -larth
+
                   mkdir dist && mv Brave*.AppImage* dist/.
 
                   echo "< Done >"
@@ -142,7 +144,7 @@ jobs:
         if: ${{ env.UPLOAD_CONTENT }}
         uses: actions/upload-artifact@v4
         with:
-          name: brave-continuous.AppImage
+          name: brave-continuous_${{ matrix.TYPE }}-${{ matrix.TAG }}.AppImage
           path: "dist"
 
       - name: ${{ env.BRAVE_NAME }}
